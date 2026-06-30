@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resume Analyzer</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Interview Tracker</p>
+            <h1>Resume Analyzer</h1>
+          </div>
+          <a class="docs-link" href="/docs">API Docs</a>
+        </header>
+
+        <div class="grid">
+          <section class="panel input-panel">
+            <form id="analysis-form">
+              <label for="candidate-name">Candidate name</label>
+              <input
+                id="candidate-name"
+                name="candidate_name"
+                type="text"
+                placeholder="Optional"
+                autocomplete="name"
+              />
+
+              <label for="job-description">Job description</label>
+              <textarea
+                id="job-description"
+                name="job_description"
+                minlength="50"
+                required
+              ></textarea>
+
+              <label for="resume-file">Resume PDF</label>
+              <input
+                id="resume-file"
+                name="resume_file"
+                type="file"
+                accept="application/pdf"
+                required
+              />
+
+              <section class="rubric-panel">
+                <div class="rubric-heading">
+                  <h2>Score weights</h2>
+                  <strong id="weights-total">100</strong>
+                </div>
+
+                <div class="weight-grid">
+                  <label>
+                    Required skills
+                    <input
+                      name="required_skills"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="35"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Experience
+                    <input
+                      name="experience_relevance"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="20"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Responsibilities
+                    <input
+                      name="responsibilities_match"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="15"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Tools
+                    <input
+                      name="tools_match"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="10"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Seniority
+                    <input
+                      name="seniority_match"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="10"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Education/domain
+                    <input
+                      name="education_domain_match"
+                      type="number"
+                      min="0"
+                      max="100"
+                      value="10"
+                      required
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <div class="actions">
+                <button id="analyze-button" type="submit">Analyze resume</button>
+                <button id="save-button" type="button" disabled>Save analysis</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel result-panel" aria-live="polite">
+            <div class="result-header">
+              <div>
+                <p class="eyebrow">Current Analysis</p>
+                <h2 id="result-title">No analysis yet</h2>
+              </div>
+              <div id="score-badge" class="score-badge is-empty">--</div>
+            </div>
+
+            <div id="status-message" class="status-message">
+              Upload a PDF resume and run an analysis.
+            </div>
+
+            <div id="analysis-output" class="analysis-output is-hidden">
+              <div class="metrics">
+                <div>
+                  <span>Fit score</span>
+                  <strong id="fit-score"></strong>
+                </div>
+                <div>
+                  <span>Recommendation</span>
+                  <strong id="recommendation"></strong>
+                </div>
+              </div>
+
+              <section>
+                <h3>Score breakdown</h3>
+                <div id="score-breakdown" class="breakdown-list"></div>
+              </section>
+
+              <div class="columns">
+                <section>
+                  <h3>Matched keywords</h3>
+                  <div id="matched-keywords" class="chips"></div>
+                </section>
+                <section>
+                  <h3>Missing keywords</h3>
+                  <div id="missing-keywords" class="chips is-warning"></div>
+                </section>
+              </div>
+
+              <div class="columns">
+                <section>
+                  <h3>Strengths</h3>
+                  <ul id="strengths"></ul>
+                </section>
+                <section>
+                  <h3>Concerns</h3>
+                  <ul id="concerns"></ul>
+                </section>
+              </div>
+
+              <section>
+                <h3>Resume summary</h3>
+                <ul id="summary-bullets"></ul>
+              </section>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel saved-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Database</p>
+              <h2>Analyzed resumes</h2>
+            </div>
+            <button id="refresh-button" type="button">Refresh</button>
+          </div>
+          <div id="saved-list" class="saved-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
