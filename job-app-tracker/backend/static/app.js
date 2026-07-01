@@ -8,6 +8,10 @@ const resultTitle = document.querySelector("#result-title");
 const scoreBadge = document.querySelector("#score-badge");
 const savedList = document.querySelector("#saved-list");
 const weightsTotal = document.querySelector("#weights-total");
+const analysisLoader = document.querySelector("#analysis-loader");
+const tabButtons = document.querySelectorAll("[data-tab]");
+const tabPanels = document.querySelectorAll(".tab-panel");
+const tabTargetButtons = document.querySelectorAll("[data-tab-target]");
 
 const scoreLabels = {
   required_skills: "Required skills",
@@ -21,10 +25,30 @@ const scoreLabels = {
 const weightKeys = Object.keys(scoreLabels);
 
 let currentResult = null;
+let isAnalyzing = false;
 
 function setStatus(message, type = "") {
   statusMessage.textContent = message;
   statusMessage.className = `status-message${type ? ` is-${type}` : ""}`;
+}
+
+function switchTab(tabName) {
+  tabButtons.forEach((button) => {
+    const isActive = button.dataset.tab === tabName;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  tabPanels.forEach((panel) => {
+    panel.classList.toggle("is-active", panel.id === `${tabName}-tab`);
+  });
+}
+
+function setLoading(active) {
+  isAnalyzing = active;
+  analysisLoader.classList.toggle("is-hidden", !active);
+  analyzeButton.textContent = active ? "Analyzing..." : "Analyze resume";
+  updateWeightTotal();
 }
 
 function renderList(elementId, items) {
@@ -82,7 +106,7 @@ function updateWeightTotal() {
   const total = scoringWeightTotal();
   weightsTotal.textContent = total;
   weightsTotal.classList.toggle("is-invalid", total !== 100);
-  analyzeButton.disabled = total !== 100;
+  analyzeButton.disabled = total !== 100 || isAnalyzing;
 }
 
 function renderScoreBreakdown(result) {
@@ -183,6 +207,7 @@ async function loadSavedAnalyses() {
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  switchTab("analyzer");
 
   const scoringWeights = getScoringWeights();
   if (scoringWeightTotal() !== 100) {
@@ -192,7 +217,7 @@ form.addEventListener("submit", async (event) => {
 
   currentResult = null;
   saveButton.disabled = true;
-  analyzeButton.disabled = true;
+  setLoading(true);
   setStatus("Analyzing resume...");
 
   const data = new FormData(form);
@@ -235,7 +260,7 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     setStatus(error.message, "error");
   } finally {
-    updateWeightTotal();
+    setLoading(false);
   }
 });
 
@@ -259,12 +284,20 @@ saveButton.addEventListener("click", async () => {
 
     setStatus("Analysis saved to the database.", "success");
     await loadSavedAnalyses();
+    switchTab("analyzer");
+    document.querySelector("#analyzer-tab").scrollIntoView({ behavior: "smooth" });
   } catch (error) {
     setStatus(error.message, "error");
     saveButton.disabled = false;
   }
 });
 
+tabButtons.forEach((button) => {
+  button.addEventListener("click", () => switchTab(button.dataset.tab));
+});
+tabTargetButtons.forEach((button) => {
+  button.addEventListener("click", () => switchTab(button.dataset.tabTarget));
+});
 refreshButton.addEventListener("click", loadSavedAnalyses);
 weightKeys.forEach((key) => form.elements[key].addEventListener("input", updateWeightTotal));
 
