@@ -236,6 +236,61 @@
       </section>
     </main>
 
+    <div id="analysis-modal" class="modal-backdrop is-hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <section class="modal-panel">
+        <header class="modal-header">
+          <div>
+            <p class="eyebrow">Saved analysis</p>
+            <h2 id="modal-title">Candidate</h2>
+            <p id="modal-meta" class="modal-meta"></p>
+          </div>
+          <button id="modal-close-button" class="secondary-button" type="button">
+            Close
+          </button>
+        </header>
+
+        <div class="modal-score-row">
+          <div id="modal-score" class="score-badge">--</div>
+          <div>
+            <span>Recommendation</span>
+            <strong id="modal-recommendation"></strong>
+          </div>
+        </div>
+
+        <section>
+          <h3>Score breakdown</h3>
+          <div id="modal-score-breakdown" class="breakdown-list"></div>
+        </section>
+
+        <div class="columns">
+          <section>
+            <h3>Matched keywords</h3>
+            <div id="modal-matched-keywords" class="chips"></div>
+          </section>
+          <section>
+            <h3>Missing keywords</h3>
+            <div id="modal-missing-keywords" class="chips is-warning"></div>
+          </section>
+        </div>
+
+        <div class="columns">
+          <section>
+            <h3>Strengths</h3>
+            <ul id="modal-strengths"></ul>
+          </section>
+          <section>
+            <h3>Concerns</h3>
+            <ul id="modal-concerns"></ul>
+          </section>
+        </div>
+
+        <section>
+          <h3>Resume summary</h3>
+          <ul id="modal-summary-bullets"></ul>
+        </section>
+      </section>
+    </div>
+
     <script src="/static/app.js"></script>
   </body>
 </html>

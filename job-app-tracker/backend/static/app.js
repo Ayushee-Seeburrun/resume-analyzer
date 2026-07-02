@@ -12,6 +12,8 @@ const analysisLoader = document.querySelector("#analysis-loader");
 const tabButtons = document.querySelectorAll("[data-tab]");
 const tabPanels = document.querySelectorAll(".tab-panel");
 const tabTargetButtons = document.querySelectorAll("[data-tab-target]");
+const analysisModal = document.querySelector("#analysis-modal");
+const modalCloseButton = document.querySelector("#modal-close-button");
 
 const scoreLabels = {
   required_skills: "Required skills",
@@ -53,6 +55,10 @@ function setLoading(active) {
 
 function renderList(elementId, items) {
   const element = document.querySelector(elementId);
+  renderListInto(element, items);
+}
+
+function renderListInto(element, items) {
   element.innerHTML = "";
 
   if (!items || items.length === 0) {
@@ -71,6 +77,10 @@ function renderList(elementId, items) {
 
 function renderChips(elementId, items) {
   const element = document.querySelector(elementId);
+  renderChipsInto(element, items);
+}
+
+function renderChipsInto(element, items) {
   element.innerHTML = "";
 
   if (!items || items.length === 0) {
@@ -111,6 +121,10 @@ function updateWeightTotal() {
 
 function renderScoreBreakdown(result) {
   const element = document.querySelector("#score-breakdown");
+  renderScoreBreakdownInto(element, result);
+}
+
+function renderScoreBreakdownInto(element, result) {
   element.innerHTML = "";
 
   weightKeys.forEach((key) => {
@@ -179,8 +193,58 @@ function savedCard(record) {
   const missingText = record.missing_keywords?.slice(0, 5).join(", ") || "None";
   missing.textContent = `Missing: ${missingText}`;
 
-  card.append(header, missing);
+  const viewButton = document.createElement("button");
+  viewButton.className = "secondary-button saved-view-button";
+  viewButton.type = "button";
+  viewButton.textContent = "View";
+  viewButton.addEventListener("click", () => openSavedAnalysis(record.id));
+
+  card.append(header, missing, viewButton);
   return card;
+}
+
+function renderSavedAnalysisModal(record) {
+  const candidateName = record.candidate_name || record.resume_filename || "Candidate";
+  const created = new Date(record.created_at).toLocaleString();
+
+  document.querySelector("#modal-title").textContent = candidateName;
+  document.querySelector("#modal-meta").textContent = `${record.fit_level} · ${created}`;
+  document.querySelector("#modal-score").textContent = `${record.fit_score}%`;
+  document.querySelector("#modal-recommendation").textContent = record.recommendation;
+
+  renderScoreBreakdownInto(document.querySelector("#modal-score-breakdown"), record);
+  renderChipsInto(document.querySelector("#modal-matched-keywords"), record.matched_keywords);
+  renderChipsInto(document.querySelector("#modal-missing-keywords"), record.missing_keywords);
+  renderListInto(document.querySelector("#modal-strengths"), record.strengths);
+  renderListInto(document.querySelector("#modal-concerns"), record.concerns);
+  renderListInto(document.querySelector("#modal-summary-bullets"), record.summary_bullets);
+
+  analysisModal.classList.remove("is-hidden");
+  document.body.classList.add("modal-open");
+}
+
+async function openSavedAnalysis(analysisId) {
+  setStatus("Loading saved analysis...");
+
+  try {
+    const response = await fetch(`/resume/analyses/${analysisId}`);
+    const record = await response.json();
+    if (!response.ok) {
+      throw new Error(record.detail || "Could not load saved analysis");
+    }
+
+    renderSavedAnalysisModal(record);
+    setStatus("Saved analysis loaded.", "success");
+  } catch (error) {
+    setStatus(error.message, "error");
+  }
+}
+
+function closeSavedAnalysisModal() {
+  analysisModal.classList.add("is-hidden");
+  document.body.classList.remove("modal-open");
+  switchTab("analyzer");
+  document.querySelector("#analyzer-tab").scrollIntoView({ behavior: "smooth" });
 }
 
 async function loadSavedAnalyses() {
@@ -299,6 +363,7 @@ tabTargetButtons.forEach((button) => {
   button.addEventListener("click", () => switchTab(button.dataset.tabTarget));
 });
 refreshButton.addEventListener("click", loadSavedAnalyses);
+modalCloseButton.addEventListener("click", closeSavedAnalysisModal);
 weightKeys.forEach((key) => form.elements[key].addEventListener("input", updateWeightTotal));
 
 updateWeightTotal();
